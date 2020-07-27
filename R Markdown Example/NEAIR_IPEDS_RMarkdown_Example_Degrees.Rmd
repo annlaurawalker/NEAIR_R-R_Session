@@ -1,0 +1,136 @@
+---
+title: "Example of R Markdown Output"
+author: "Ann Laura Walker"
+date: "`r format(Sys.time(), '%B  %d, %Y')`"
+output: 
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+---
+
+```{r message=FALSE, cache=FALSE, echo=FALSE, warning=FALSE}
+# If you do not have these packages, you can add them manually under "Packages" in the window in the lower right. Select Install and type in one of these packages at a time. Or you can run this line without the "#" at the beginning
+
+# install.packages("readr", "janitor", "tidyr", "dplyr", "formattable", "rmdformats")
+
+library(readr)  #read data into R 
+library(janitor) # allows us to get row totals
+library(tidyr)  # allows us to flip data in between long and wide format
+library(dplyr)  # Data Transformation
+library(formattable) # as the name suggests, allows us to have formatted tables
+library(rmdformats)  # template for Rmarkdowns
+
+
+# reading data in (readr package)
+# data were extracted from: https://www.usmd.edu/IRIS/DataJournal/Degrees/?report=Degrees-Awarded# 
+degrees <- read.csv(url("https://raw.githubusercontent.com/annlaurawalker/NEAIR_R-R_Session/master/R%20Markdown%20Example/NEAIR_IPEDS_RMarkdown_Example_Degrees.csv"))
+
+# percent function
+percent <- function(x, digits = 1, format = "f", ...) {
+  paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+}
+```
+
+```{r message=FALSE, cache=FALSE, echo=FALSE, warning=FALSE}
+# making subsets for each degree types
+bach <- subset(degrees, degree_description=="Bachelors")
+
+# transposing data from long to wide (tidyr package)
+bach_wide <- spread(bach, collect_year, count)
+
+# removing cells no longer needed
+bach_wide <- subset(bach_wide, select = -c(degree, degree_description))
+
+# replacing NAs with 0s
+bach_wide[is.na(bach_wide)] <- 0
+
+# adding a total row (janitor package)
+bach_wide <- bach_wide %>%  adorn_totals("row")  
+
+# Conducting the same functions on masters degrees
+mast <- subset(degrees, degree_description=="Masters")
+mast_wide <- spread(mast, collect_year, count)
+mast_wide <- subset(mast_wide, select = -c(degree, degree_description))
+mast_wide[is.na(mast_wide)] <- 0
+mast_wide <- mast_wide %>%  adorn_totals("row")
+
+rm(bach, mast, degrees)
+```
+
+### Bachelor Degree Counts, 2015-2019
+```{r message=FALSE, cache=FALSE, echo=FALSE, warning=FALSE}
+# adding a percent diference between 2015 to 2019 as well as between 2018 & 2019
+bach_wide$pct_diff_1 <- percent(apply(bach_wide[,c('2019', '2015')], 1, function(x) { (x[1]-x[2])/x[2]} ))
+
+bach_wide$pct_diff_2 <- percent(apply(bach_wide[,c('2019', '2018')], 1, function(x) { (x[1]-x[2])/x[2]} ))
+
+# formatting each column so numbers would have commas in them.
+bach_wide$form_2015 <- formatC(bach_wide$"2015", format="f", big.mark=",", digits=0)
+bach_wide$form_2016 <- formatC(bach_wide$"2016", format="f", big.mark=",", digits=0)
+bach_wide$form_2017 <- formatC(bach_wide$"2017", format="f", big.mark=",", digits=0)
+bach_wide$form_2018 <- formatC(bach_wide$"2018", format="f", big.mark=",", digits=0)
+bach_wide$form_2019 <- formatC(bach_wide$"2019", format="f", big.mark=",", digits=0)
+
+# selecting only needed columns for formatted table
+bach_wide <- bach_wide %>% select(instititution_name, form_2015, form_2016, form_2017, form_2018, form_2019, pct_diff_1, pct_diff_2)
+
+# changing names of the column
+names(bach_wide) <- c("USM<br/> Institution", "2015", "2016", "2017", "2018", "2019", "Pct. Diff. from<br/>2015 to 2019", "Pct. Diff. from<br/>2018 to 2019")
+
+formattable(bach_wide, align = "l", list(
+  Name=formatter(
+    "span",
+    style = x ~ ifelse(x == "Technology", 
+                       style(font.weight = "bold"), NA)),
+  "2015" = color_tile("white", "white"),
+  "Pct. Diff. from<br/>2015 to 2019" = formatter(
+    "span",
+    style = x ~ style(color = ifelse(x < 0 , "red", "green")),
+    x ~ icontext(ifelse(x < 0, "arrow-down", "arrow-up"), x)), 
+  "Pct. Diff. from<br/>2018 to 2019" = formatter(
+    "span",
+    style = x ~ style(color = ifelse(x < 0 , "red", "green")),
+    x ~ icontext(ifelse(x < 0, "arrow-down", "arrow-up"), x)))
+)
+```
+
+### Master Degree Counts, 2015-2019
+```{r message=FALSE, cache=FALSE, echo=FALSE, warning=FALSE}
+# adding a percent diference between 2015 to 2019 as well as between 2018 & 2019
+mast_wide$pct_diff_1 <- percent(apply(mast_wide[,c('2019', '2015')], 1, function(x) { (x[1]-x[2])/x[2]} ))
+
+mast_wide$pct_diff_2 <- percent(apply(mast_wide[,c('2019', '2018')], 1, function(x) { (x[1]-x[2])/x[2]} ))
+
+# formatting each column so numbers would have commas in them.
+mast_wide$form_2015 <- formatC(mast_wide$"2015", format="f", big.mark=",", digits=0)
+mast_wide$form_2016 <- formatC(mast_wide$"2016", format="f", big.mark=",", digits=0)
+mast_wide$form_2017 <- formatC(mast_wide$"2017", format="f", big.mark=",", digits=0)
+mast_wide$form_2018 <- formatC(mast_wide$"2018", format="f", big.mark=",", digits=0)
+mast_wide$form_2019 <- formatC(mast_wide$"2019", format="f", big.mark=",", digits=0)
+
+# selecting only needed columns for formatted table
+mast_wide <- mast_wide %>% select(instititution_name, form_2015, form_2016, form_2017, form_2018, form_2019, pct_diff_1, pct_diff_2)
+
+# changing names of the column
+names(mast_wide) <- c("USM<br/> Institution", "2015", "2016", "2017", "2018", "2019", "Pct. Diff. from<br/>2015 to 2019", "Pct. Diff. from<br/>2018 to 2019")
+
+formattable(mast_wide, align = "l", list(
+  Name=formatter(
+    "span",
+    style = x ~ ifelse(x == "Technology", 
+                       style(font.weight = "bold"), NA)),
+  "2015" = color_tile("white", "white"),
+  "Pct. Diff. from<br/>2015 to 2019" = formatter(
+    "span",
+    style = x ~ style(color = ifelse(x < 0 , "red", "green")),
+    x ~ icontext(ifelse(x < 0, "arrow-down", "arrow-up"), x)), 
+  "Pct. Diff. from<br/>2018 to 2019" = formatter(
+    "span",
+    style = x ~ style(color = ifelse(x < 0 , "red", "green")),
+    x ~ icontext(ifelse(x < 0, "arrow-down", "arrow-up"), x)))
+)
+```
+
