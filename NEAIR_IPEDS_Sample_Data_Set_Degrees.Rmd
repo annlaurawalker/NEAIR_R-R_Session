@@ -1,0 +1,457 @@
+---
+title: "NEAIR Tools to See Workhop Series"
+subtitle: 'Are you Ready for some R & R?: An Intro to R Programming & Data Analysis'
+author: "Laura Walker"
+date: "`r format(Sys.time(), '%B  %d, %Y')`"
+output: 
+  html_document: default
+---
+<style type="text/css">
+
+h1.title {
+  font-size: 28px;
+  font-weight: bold;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #AF272F;
+}
+
+h3.subtitle {
+  font-size: 22px;
+  font-style: italic;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+h4.author {
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+h1 { /* Header 1 */
+  font-size: 22px;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+h2 { /* Header 2 */
+    font-size: 18px;
+	font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+h3 { /* Header 3 */
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+
+h4 { /* Header 4 */
+  font-size: 14px;
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  color: #101820;
+}
+
+</style>
+---
+
+```{r setup, echo = F, results="hide"}
+## Chunk 1
+knitr::opts_chunk$set(error = TRUE)
+
+ # !diagnostics off
+
+# In the chunk entitled, "Grouping a Data Frame" there is a line that purposely results in an error. The line above allows for this RMarkdown file to be "knit" together even with that error
+```
+
+# Downloading Programs
+<a href="https://cran.r-project.org/bin/windows/base/" target="_blank">Download R</a> </br>
+<a href="https://www.rstudio.com/products/rstudio/download/" target="_blank">Download R Studio</a> </br>
+
+# Resources
+<a href="https://rstudio.com/resources/cheatsheets/" target="_blank">R Studio Cheat Sheets</a> </br>
+<a href="https://rmarkdown.rstudio.com/lesson-1.html" target="_blank">R Markdown Introduction</a> </br>
+<a href="https://rmarkdown.rstudio.com/gallery.html" target="_blank">R Markdown Gallery</a> </br>
+
+### Chunk #2--Opening Packages
+```{r, message=FALSE}
+# This is to be run every time you use this R Markdown document
+library(dplyr) # Data Manipulation
+library(knitr) # R Markdown files
+library(readr) # Reading data into R
+library(tidyr) # Data Transformation
+```
+
+### Chunk #3--Setting the Working Directory
+```{r, message=FALSE}
+getwd()
+
+# 1 Open Windows Explorer
+# 2 Navigate to C Drive
+# 3 Select "Users"
+# 4 Select Desktop
+# 5 Copy the Address **BE SURE TO REPLACE THE "\" WITH "/"
+setwd("c:/Users/alwalker/Desktop/NEAIR Presentation")
+```
+### Chunks #4--Naming objects
+```{r, message=FALSE, warning=FALSE}
+# Format of and R object
+title <- "You_R_What_You_Code"
+
+year <- 2020
+```
+
+### Chunks #5--Reading in Data--There are many ways to do this
+#### Method 1--Not Through and Through the Working directory
+```{r, message=FALSE, warning=FALSE}
+# This file could be read into R without setting a working directory but you would have to run (without #): 
+# degrees <- read_csv("c:/Users/alwalker/Desktop/NEAIR Presentation/NEAIR_IPEDS_Sample_Data_Set_Degrees.csv"). 
+# This should not be run if you DID set a directory because doing both would cause an error.
+
+# Reading data in (readr package)
+# Because you set a working directory, all you'll have to do is refer to the file by name when reading it into R. 
+degrees <- read_csv("NEAIR_IPEDS_Sample_Data_Set_Degrees.csv")
+
+rm(title, year)
+
+#### Method 2--Through R Studio's Import Data Function (refer to NEAIR's video to view)
+
+#### Method 3--Code for getting data straight from the Internet
+degrees <- read.csv(url("https://raw.githubusercontent.com/annlaurawalker/NEAIR_R-R_Session/master/NEAIR_IPEDS_Sample_Data_Set_Degrees.csv"))
+
+```
+
+### Seeing, Renaming, and Rearranging Column Names
+#### Chunk #6--Seeing a List of Column Names
+```{r, message=FALSE, warning=FALSE}
+colnames(degrees)
+# Column names, as you can see, are long and have blanks and punctuation in the names. Code in the next chunk fixes both problems:
+```
+
+#### Chunk #7--Renaming Column Names
+```{r, message=FALSE}
+# Changing column names
+colnames(degrees) <- c("unitid", "inst_name","year", "state", "inst_sector", "hbcu", "count_assoc_degrees", "count_bach_degrees", "count_mast_degrees", "count_phd_rs_degrees", "count_phd_pp_degrees", "count_phd_other_degrees", "count_certs_less_yr", "count_certs_1_2_yr", "count_certs_2_4_yr", "count_certs_post_bach", "count_certs_post_mast", "count_assoc_students", "count_bach_students", "count_mast_students", "count_phd_students", "count_certs_less_yr_students", "count_certs_1_4_yr_students", "count_certs_post_bach_mast_students")
+
+colnames(degrees)
+```
+
+#### Chunk #8--Rearranging Columns
+```{r, message=FALSE}
+# Code below is using the dplyr package
+
+# "%>%" is called a pipe and, in the R language, it's very similar to an if/then statement. 
+# In prose, the code below means
+# Create a new dataframe named "degrees_arranged" THEN
+# Take the data frame "degrees" THEN 
+# Select these fields in this order
+
+degrees_arranged <-
+  degrees %>%  
+  select(unitid, inst_name,year, count_assoc_degrees, count_assoc_students, count_bach_degrees, count_bach_students, count_mast_degrees, count_mast_students, count_phd_rs_degrees, count_phd_pp_degrees, count_phd_other_degrees, count_phd_students, count_certs_less_yr, count_certs_less_yr_students, count_certs_1_2_yr, count_certs_2_4_yr, count_certs_1_4_yr_students, count_certs_post_bach, count_certs_post_mast, count_certs_post_bach_mast_students)
+
+
+# Note the both the new data frame in the environment AND number of variables!
+# That line didn't include these variables: inst_sector, state, hbcu
+# Sometimes you will want to get rid of variables but other times you'll want to keep all. 
+
+degrees <- degrees %>%  select(year, state, unitid, inst_name, hbcu, inst_sector, count_assoc_degrees, count_assoc_students, count_bach_degrees, count_bach_students, count_mast_degrees, count_mast_students, count_phd_rs_degrees, count_phd_pp_degrees, count_phd_other_degrees, count_phd_students, count_certs_less_yr, count_certs_less_yr_students,count_certs_1_2_yr, count_certs_2_4_yr, count_certs_1_4_yr_students, count_certs_post_bach, count_certs_post_mast, count_certs_post_bach_mast_students)
+
+# rm removes listed items in the environment
+rm(degrees_arranged)
+```
+
+### Chunk #9--Head of a Data Frame
+```{r, message=FALSE}
+head(degrees)
+```
+
+### Chunk #10--Viewing the nth Row of Data
+```{r, message=FALSE}
+# Example: How to see the 10th row of data:
+degrees[10,]
+```
+
+### Chunk #11--First Twenty-Five Rows of a Dataframe
+```{r, message=FALSE}
+head(degrees, 25)
+```
+
+### Chunk #12--Last Four Rows of a Dataframe
+```{r, message=FALSE}
+tail(degrees, 4)
+```
+### Chunk #13--Summary Function
+```{r, message=FALSE}
+summary(degrees)
+```
+
+### Chunk #14--Structure Function--What do your data look like? 
+```{r, message=FALSE}
+str(degrees)
+```
+
+## Performing more functions on the data frame
+### Chunk #15--Sorting a Data Frame
+```{r, message=FALSE}
+degrees <- degrees %>% arrange(state, inst_name)
+
+# An example of sorting by descending order--Sorting by state and count of bachelors degrees, highest to lowest
+degrees_bach <- degrees %>% arrange(state, (desc(count_bach_degrees)))
+
+# Removing data frames from the environment
+rm(degrees_bach)
+```
+
+### Chunk #16--Filtering a Data Frame
+```{r, message=FALSE}
+# Creating a data frame of institutions in New Jersey
+new_jersey <- degrees %>% # selects dataframe "degrees"
+  filter(state == "New Jersey")
+
+
+# What about multiple conditions? 
+# Creating a data frame with HBCU institutions in Virginia
+virginia_hbcu <- degrees %>% 
+  filter(state == "Virginia", hbcu=="Yes")
+
+virginia_non_hbcu <- degrees %>% 
+  filter(state == "Virginia", hbcu!="Yes")
+
+# What if you wanted to filter for Massachusetts institutions and only wanted student counts and the institution's main info? 
+# You filter and then select your desired variables 
+mass_student_count <- degrees %>% 
+  filter(state == "Massachusetts") %>%
+  select(unitid, inst_name, hbcu, inst_sector, count_assoc_students, count_bach_students, count_mast_students, count_phd_students, count_certs_less_yr_students, count_certs_1_4_yr_students, count_certs_post_bach_mast_students)   
+
+# What about numbers? You don't use quotation marks around the filter conditions
+# Example below 
+assoc_deg <- degrees %>%   
+  filter(count_assoc_degrees >= 1000) %>%  # where the count of associates degrees is greater than or equal to 1,000
+  select(unitid, inst_name, state, hbcu, inst_sector, count_assoc_degrees, count_assoc_students) %>%  # selects these variables 
+  arrange(desc(count_assoc_degrees))   # and, finally, arranges them in descending order by "count_assoc"
+
+rm(new_jersey, virginia_hbcu, virginia_non_hbcu, mass_student_count, assoc_deg) 
+```
+
+### Chunk #17--Creating New Variables 
+```{r, message=FALSE}
+# Creating a new data frame for phds using the OR function. 
+# This data frame filters "degrees" by rows where any of the PhD degree variables is greater than zero. 
+phd_degrees <- degrees %>%
+  filter(count_phd_rs_degrees > 0 | count_phd_pp_degrees > 0 | count_phd_other_degrees > 0 ) %>%  
+  select(unitid, inst_name, state, hbcu, inst_sector, count_phd_rs_degrees, count_phd_pp_degrees, count_phd_other_degrees)
+
+# structure of a new variable
+
+#  df_name$new_variable_name <- df_name$variable_1 + df_name$variable_2
+
+# Let's create a new variable--Total PhDs
+phd_degrees$degrees_total <- phd_degrees$count_phd_rs_degrees + phd_degrees$count_phd_pp_degrees + phd_degrees$count_phd_other_degrees
+
+# Percentage of PhDs that were research and scholarly 
+# Note: / is used for dividing (* for multiplication, - for subtraction)
+phd_degrees$pct_phd_rs <- phd_degrees$count_phd_rs_degrees / phd_degrees$degrees_total
+
+# What do you notice about this new variable?
+# Can we round it?
+# Of course!
+
+# How to round an already established variable:
+phd_degrees$pct_phd_rs <- round(phd_degrees$pct_phd_rs, digits=3)
+
+# How to combine both functions of calculating a percentage and rounding it at the same time
+phd_degrees$pct_phd_rs <- round(phd_degrees$count_phd_rs_degrees / phd_degrees$degrees_total, digits=3)
+
+
+# What if you want it formatted like a percent for a report?
+# This is a user-defined function that does just that.
+percent <- function(x, digits = 1, format = "f", ...) { 
+  paste0(formatC(x * 100, format = format, digits = digits, ...), "%")
+}
+
+# note the _char at the end of this new variable. Once you create a format to a variable, it often ceases to be considered a number. 
+phd_degrees$pct_phd_rs_char <- percent(round(phd_degrees$count_phd_rs_degrees / phd_degrees$count_phd_degrees_total, digits=3))
+
+# You won't be able to conduct any math operations on character variables
+str(phd_degrees)
+
+rm(phd_degrees)
+```
+
+### Chunk #18--Grouping a Data Frame
+```{r, message=FALSE}
+# Using dplyr's summarise function
+
+# This is a record count of the institutions by state
+count_by_state <- degrees %>% 
+  group_by(state) %>% 
+  summarise (inst_count = n())
+
+# You can add onto this and use a variety of functions
+count_by_state_assoc_deg <- degrees %>% 
+  group_by(state) %>% 
+  summarise (inst_count = n(),
+             sum_assoc_degrees = sum(count_assoc_degrees))
+
+# Look at this data frame--what's wrong with it? 
+
+# Why was DC, DE and WV the only states with totals? 
+test <- degrees %>% 
+  filter(state == "West Virginia" | state == "District of Columbia" | state == "Delaware")
+
+# For whatever reason, WV, DC & DE had 0s listed in the data frame and that's why the sum function could work
+
+# Two ways to fix this
+# 1- in the specific data frame:
+count_by_state_assoc_deg <- degrees %>% group_by(state) %>% summarise (inst_count = n(), 
+                                                                       sum_assoc_degrees = sum(count_assoc_degrees, na.rm = TRUE))
+
+# 2- getting rid of the NAs in the data frame
+# replacing NAs in just one column
+degrees$count_assoc_degrees[is.na(degrees$count_assoc_degrees)] <- 0
+
+# replacing NAs--whole dataframe
+degrees[is.na(degrees)] <- 0
+
+# Now that 0s are in place of all NAs in the "degrees" dataframe, the na.rm feature is no longer needed
+count_by_state_assoc_deg <- degrees %>% group_by(state) %>% summarise (inst_count = n(), 
+                                                                       sum_assoc_degrees = sum(count_assoc_degrees), 
+                                                                       sum_bach_degrees = sum(count_bach_degrees))
+
+# What if you want sums of all the numeric variables? 
+total_by_state <- degrees %>% group_by(state) %>% summarise_each(funs(sum)) #spoiler--this will cause an error
+```
+
+### Our reaction:
+![](https://media.giphy.com/media/VbnUQpnihPSIgIXuZv/giphy.gif) 
+
+
+### Chunk #19--Grouping a Data Frame, Take 2
+```{r, message=FALSE}
+# this line says summarise if the variable is numeric
+total_by_state <- degrees %>% group_by(state) %>% summarise_if(is.numeric,sum)
+
+# This summed up Unit ID and Year, which isn't necessary or helpful 
+# The code below changes the 'unitid' and 'year' from numerics to characters
+degrees$unitid <- as.character(as.numeric(degrees$unitid))
+degrees$year <- as.character(as.numeric(degrees$unitid))
+
+# Let's try this again
+total_by_state_v2 <- degrees %>% group_by(state) %>% summarise_if(is.numeric,sum)
+
+rm(count_by_state, count_by_state_assoc_deg, test, total_by_state, total_by_state_v2)
+```
+
+### Chunk #20--Extracting the lowest value by group
+```{r, message=FALSE}
+# extracting the minimum of a field
+lowest_masters_count <- degrees %>% 
+  group_by(state) %>% 
+  slice(which.min(count_mast_degrees))
+
+# All that code did was include the first institution listed with a value of 0. Not very helpful. 
+
+# Options
+# 1- We could create a new data frame where the "count_mast_degrees" is greater than 0 and use that data frame 
+masters_deg <- degrees %>% filter(count_mast_degrees > 0) 
+
+lowest_masters_count_option_1 <- masters_deg %>% 
+  group_by(state) %>% 
+  slice(which.min(count_mast_degrees)) 
+
+# 2b-When that occurs, usually you have to rearrange the commands. In this case, the filter needs to be above the slicing
+lowest_masters_count_option_2 <- degrees %>% 
+  group_by(state) %>% 
+  filter(count_mast_degrees > 0) %>% 
+  slice(which.min(count_mast_degrees))
+
+# slice(which.max), as you can image, gives you the maximum value
+
+rm(lowest_masters_count, masters_deg, lowest_masters_count_option_1, lowest_masters_count_option_2)
+```
+
+### Chunk #21--Merging two Data Frames together
+
+#### Data were extracted from <a href="https://worldpopulationreview.com/states/state-abbreviations" target="_blank"> this site at the bottom.</a> "name-abbr.csv"</br>
+
+```{r, message=FALSE}
+# Merge the State name from 'degrees' with its state abbreviation
+
+# I wanted to have an example where we get data from a source online and read it into our R environment without having to download it
+
+# Data extracted from: https://worldpopulationreview.com/states/state-abbreviations 
+states <- read.csv(url("https://worldpopulationreview.com/static/states/name-abbr.csv"))
+# What's wrong with this data frame?
+head(states, 3) 
+
+states_v2 <- read.csv(url("https://worldpopulationreview.com/static/states/name-abbr.csv"), header = FALSE)
+# What's wrong with this data frame?
+head(states_v2, 2) 
+
+# the good news is we now have ALL states in the data frame but the bad news is the column names aren't meaningful
+names(states_v2) <- c("state_name","state_abb")
+head(states_v2, 2) 
+
+# yay! The data are in the format we need!
+
+# Merging the two data sets together
+degrees <- merge(x=degrees, y=states_v2, by.x="state", by.y="state_name", all.x = TRUE)
+
+# Note: the order of your variables has changed. You may want/need to rearrange them
+
+rm(states, states_v2)
+```
+
+<a href="http://www.cookbook-r.com/Data_input_and_output/Loading_data_from_a_file/" target="_blank">More on Loading Data into R</a> </br>
+<a href="https://www.cookbook-r.com/" target="_blank">Cookbook for R is a really good source of R Help</a> </br>
+
+### Chunk #22--Data Cleaning
+```{r, message=FALSE}
+# 1- get a list of the unique values of inst_sector
+sectors <- distinct(degrees, inst_sector)
+sectors
+```
+### Chunk #22 (Cont'd)
+```{r, message=FALSE}
+# Lets say you wanted to divide the "sector" variable into three sections
+# 1--public or private
+# 2--for-profit or not-for profit
+# 3--years
+# We'll be doing R's version of Excel's Text to columns but first we have to git rid of spaces between the variables in inst_sector
+
+# R's ifelse
+
+# Lets start with the semantics of an ifelse statement
+
+# data_frame$new_variable <- ifelse("this condition is met", "option1 if condition met", "option2 if condition is not met")
+
+
+degrees$example <- ifelse(degrees$count_bach_degrees > 0, "Bachelor Degrees Awarded", "No Bachelor Degrees Awarded")
+
+
+# Here is an example with different options:
+degrees$inst_sector_rev <- ifelse(degrees$inst_sector=="Private for-profit, 2-year", "Private/for_profit/2_yr",
+                                  ifelse(degrees$inst_sector=="Private for-profit, 4-year or above", "Private/for_profit/4_yr", 
+                                         ifelse(degrees$inst_sector=="Private for-profit, less-than 2-year", "Private/for_profit/less_than_2_yr", 
+                                                ifelse(degrees$inst_sector=="Private not-for-profit, 2-year", "Private/not_for_profit/2_yr", 
+                                                       ifelse(degrees$inst_sector=="Private not-for-profit, 4-year or above", "Private/not_for_profit/4_yr", 
+                                                              ifelse(degrees$inst_sector=="Private not-for-profit, less-than 2-year", "Private/not_for_profit/less_than_2_yr", 
+                                                                     ifelse(degrees$inst_sector=="Public, 2-year", "Public/not_for_profit/2_yr", 
+                                                                            ifelse(degrees$inst_sector=="Public, 4-year or above", "Public/not_for_profit/4_yr", "Public/not_for_profit/less_than_2_yr"))))))))
+                                      
+
+# we're duplicating this field so you can see the whole picture at the end
+degrees$inst_sector_rev_2 <- degrees$inst_sector_rev
+
+
+# This is R's version of Excel's Text To Columns feature
+degrees <- separate(data = degrees, col = inst_sector_rev_2, into = c("inst_sector", "inst_type", "inst_level"), sep = "\\/")
+```
+
+
+### Chunk #23 Writing a file to a csv
+```{r, message=FALSE}
+#if you wanted to write a file back to your working directory, you would run this code and it will be placed in your working directory
+write.csv(degrees, file = "degrees_rev.csv",row.names=FALSE)
+
+```
+
